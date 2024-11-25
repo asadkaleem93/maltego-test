@@ -229,6 +229,7 @@ const Graph = ({ params }) => {
       />
 
       <SearchField
+        id="search-nodes"
         value={searchedLabel}
         onChange={(v: string) => {
           onCancelSearch();

@@ -120,6 +120,7 @@ const GraphsList: React.FC = () => {
         )}
       />
       <SearchField
+        id="search-graphs"
         value={searchFileText}
         onChange={(v: string) => setSearchFileText(v)}
         onSearch={searchGraphs}
