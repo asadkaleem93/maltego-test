@@ -2,6 +2,7 @@
 ## Getting Started
 
 ```bash
+use branch `main`
 Use node version 18.*
 
 Run project:
