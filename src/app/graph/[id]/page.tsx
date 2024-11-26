@@ -1,13 +1,13 @@
 'use client';
 
-import { Button, Empty, Modal, Select } from 'antd';
+import { Button, Empty, Modal, Popconfirm, Select } from 'antd';
 import Input from 'antd/es/input/Input';
 import * as d3 from 'd3';
 import { useEffect, useState, use } from 'react';
 import './style.css';
 
 import { GraphChart } from '@/app/components/graphChart/graphChart';
-import { Edges, Nodes } from '@/app/interface';
+import { Edges, Node } from '@/app/interface';
 import { LoadingOutlined } from '@ant-design/icons';
 import { PageHeader } from '@/app/components/pageHeader/pageHeader';
 import { SearchField } from '@/app/components/searchField/searchField';
@@ -15,7 +15,7 @@ import { regularNodeSize, searchedNodeSize } from '@/constants';
 import { generateRandomString } from '@/helpers';
 import { fetchSingleGraphs } from '@/apiUrls';
 
-export interface NodeWithIndex extends Nodes {
+export interface NodeWithIndex extends Node {
   index: number;
 }
 
@@ -24,19 +24,15 @@ const changeTheSizeOfNode = (
   label: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
   size: number,
 ) => {
-  // const moveLabelNumber = size === searchedNodeSize ? 40 : 20;
   node.transition().duration(500).ease(d3.easeCubicInOut).attr('r', size);
-  // label
-  //   .transition()
-  //   .attr('x', (d: any) => d.x - moveLabelNumber)
-  //   .attr('y', (d: any) => d.y - moveLabelNumber);
+  label.style('display', size === searchedNodeSize ? 'none' : 'unset');
 };
 
 const Graph = ({ params }) => {
   const resolvedParams = use(params) as { id: string };
   const graphId = resolvedParams?.id || '';
   const [data, setData] = useState<{
-    nodes: Nodes[];
+    nodes: Node[];
     edges: Edges[];
     name: string;
   }>({
@@ -47,7 +43,7 @@ const Graph = ({ params }) => {
 
   const [searchedLabel, setSearchedLabel] = useState('');
   // IF USER SEARCHES THE NODES THROUGH SEARCH BAR BY CLICKING ON IT
-  const [searchedNodes, setSearchedNodes] = useState<Nodes[]>([]);
+  const [searchedNodes, setSearchedNodes] = useState<Node[]>([]);
   // IF USER SELECTS THE NODE BY CLICKING ON IT
   const [selectedNode, setSelectedNode] = useState<NodeWithIndex | null>(null);
 
@@ -60,7 +56,7 @@ const Graph = ({ params }) => {
   const [isEditNodeFieldEmpty, setIsEditNodeFieldEmpty] = useState(false);
 
   const [newNodeName, setNewNodeName] = useState<string>('');
-  const [toBeConnectedNode, setToBeConnectedNode] = useState<string>('');
+  const [toBeConnectedNode, setToBeConnectedNode] = useState<string>('nd_1');
   const [editedNodeName, setEditNodeName] = useState<string>('');
 
   useEffect(() => {
@@ -72,7 +68,7 @@ const Graph = ({ params }) => {
         setData({ nodes: data.nodes, edges: data.edges, name: name });
         setIsLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setIsLoading(false);
       });
 
@@ -114,7 +110,7 @@ const Graph = ({ params }) => {
     // SINCE I HAVE NO DATABASE SO NOT MAKING AN API CALL
     setData((prev) => ({ ...prev, nodes, edges }));
     setSelectedNode(null);
-    setToBeConnectedNode('');
+    setToBeConnectedNode('nd_1');
   };
 
   const createNode = () => {
@@ -147,7 +143,7 @@ const Graph = ({ params }) => {
       setSearchedLabel('');
       setNewNodeName('');
       setIsAddNodeModalOpen(false);
-      setToBeConnectedNode('');
+      setToBeConnectedNode('nd_1');
     }
   };
 
@@ -176,7 +172,7 @@ const Graph = ({ params }) => {
     }
   };
 
-  const changeSizeOfNodeOnSearch = (nodes: Nodes[], sizeToMove: number) => {
+  const changeSizeOfNodeOnSearch = (nodes: Node[], sizeToMove: number) => {
     for (let i = 0; i < nodes.length; i++) {
       const node = d3.select(`#node-${nodes[i].id}`);
       const label = d3.select(`#label-${nodes[i].id}`);
@@ -195,14 +191,36 @@ const Graph = ({ params }) => {
   };
 
   const onSearchNode = () => {
-    const filteredNodes = data.nodes.filter((node) => {
-      return node.label.toLowerCase().includes(searchedLabel.toLowerCase());
-    });
-    if (filteredNodes.length) {
-      changeSizeOfNodeOnSearch(filteredNodes, searchedNodeSize);
-      setSearchedNodes(filteredNodes);
-    } else {
+    if (searchedLabel.length) {
+      const filteredNodes = data.nodes.filter((node) => {
+        return node.label
+          .toLowerCase()
+          .includes(searchedLabel.trim().toLowerCase());
+      });
+      if (filteredNodes.length) {
+        changeSizeOfNodeOnSearch(filteredNodes, searchedNodeSize);
+        setSearchedNodes(filteredNodes);
+      }
     }
+  };
+
+  const onCancelDeleteNode = () => {
+    setIsEditNodeModalOpen(false);
+    setEditNodeName('');
+    const node = d3.select(`#node-${selectedNode?.id}`);
+    const label = d3.select(`#label-${selectedNode?.id}`);
+    if (!node.empty()) {
+      changeTheSizeOfNode(node, label, regularNodeSize);
+    }
+  };
+
+  const onConfirmDeleteNode = () => {
+    setIsEditNodeModalOpen(false);
+    setEditNodeName('');
+    setSearchedNodes([]);
+    setSearchedLabel('');
+
+    updateGraph();
   };
 
   if (isLoading) {
@@ -217,12 +235,17 @@ const Graph = ({ params }) => {
     value: node.id,
     label: <span>{node.label}</span>,
   }));
+
   return (
     <>
       <PageHeader
         heading={data.name}
         RightContent={() => (
-          <Button type="primary" onClick={() => setIsAddNodeModalOpen(true)}>
+          <Button
+            type="primary"
+            onClick={() => setIsAddNodeModalOpen(true)}
+            id="add-node-button"
+          >
             Add Node
           </Button>
         )}
@@ -230,6 +253,7 @@ const Graph = ({ params }) => {
 
       <SearchField
         id="search-nodes"
+        searchButtonId="search-node-button"
         value={searchedLabel}
         onChange={(v: string) => {
           onCancelSearch();
@@ -248,15 +272,18 @@ const Graph = ({ params }) => {
           setIsAddNodeModalOpen(false);
           setNewNodeName('');
         }}
+        okButtonProps={{ id: 'add-node-submit-button' }}
       >
         <div className="add-node-modal-container">
           <Input
-            placeholder="node Name"
+            id="add-node-input-field"
+            placeholder="Node Name"
             value={newNodeName}
             onChange={(e) => setNewNodeName(e.target.value)}
             status={isAddNodeFieldEmpty ? 'error' : ''}
           />
           <Select
+            id="other-nodes"
             options={nodesToConnect}
             style={{ width: '100%' }}
             onChange={(v: string) => setToBeConnectedNode(v)}
@@ -268,19 +295,29 @@ const Graph = ({ params }) => {
       <Modal
         title={selectedNode?.label}
         open={isEditNodeModalOpen}
-        onOk={EditNode}
-        cancelText={<span>Delete</span>}
-        onCancel={() => {
-          setIsEditNodeModalOpen(false);
-          setEditNodeName('');
-          setSearchedNodes([]);
-          setSearchedLabel('');
-
-          updateGraph();
-        }}
+        onCancel={onCancelDeleteNode}
+        footer={[
+          <Button key="back" onClick={EditNode} id="edit-node-button">
+            Edit
+          </Button>,
+          <Popconfirm
+            key="delete-node"
+            title="Delete Node"
+            description="Are you sure to delete this Node?"
+            okText="Yes"
+            cancelText="No"
+            onCancel={onCancelDeleteNode}
+            onConfirm={onConfirmDeleteNode}
+          >
+            <Button key="submit" type="primary" onClick={() => {}}>
+              Delete
+            </Button>
+          </Popconfirm>,
+        ]}
       >
         <Input
-          placeholder="node Name"
+          id="edit-node-label-field"
+          placeholder="Node Name"
           value={editedNodeName}
           onChange={(e) => setEditNodeName(e.target.value)}
           status={isEditNodeFieldEmpty ? 'error' : ''}

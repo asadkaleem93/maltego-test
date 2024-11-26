@@ -16,6 +16,7 @@ export async function GET(
   }
 }
 
+// THIS CODE IS COMMENTED BECAUSE IF I CREATE A BUILD IT CRASHES BECAUSE OF UNSED CONSTANTS
 export async function DELETE(
   // request: Request,
   // { params }: { params: { id: string } },

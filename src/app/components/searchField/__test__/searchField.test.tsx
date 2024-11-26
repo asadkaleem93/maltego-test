@@ -7,8 +7,9 @@ describe('Component', () => {
     render(
       <SearchField
         id="search-nodes"
+        searchButtonId="search-node-button"
         value={'node'}
-        onChange={(v: string) => {}}
+        onChange={() => {}}
         onCancelSearch={() => {}}
         onSearch={() => {}}
         placeholder="Node label"

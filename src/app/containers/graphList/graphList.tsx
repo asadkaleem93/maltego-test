@@ -1,28 +1,28 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Table } from 'antd';
+import { Button, Input, Popconfirm, Table } from 'antd';
 
-import { Graphs } from '@/app/interface';
+import { Graph } from '@/app/interface';
 import './style.css';
 import Column from 'antd/es/table/Column';
 import Link from 'next/link';
 import Modal from 'antd/es/modal/Modal';
 import {
   DeleteOutlined,
+  ExportOutlined,
   LoadingOutlined,
-  MergeFilled,
 } from '@ant-design/icons';
 import { deleteGraphs, getOrUpdateGraphs } from '@/apiUrls';
 import { PageHeader } from '@/app/components/pageHeader/pageHeader';
 import { SearchField } from '@/app/components/searchField/searchField';
 import { searchGraphsFromNodes } from './helper';
 
-let originalData: Graphs[] = [];
+let originalData: Graph[] = [];
 
 const GraphsList: React.FC = () => {
-  // SETTING FILTERED GRAPHS IN STATE IS BECAUSE I DON'T WANT TO FILTER THE GRAPHS BEFORE RENDERING
-  const [graphs, setGraphs] = useState<Graphs[]>([]);
+  // SETTING FILTERED GRAPHS IN STATE IS BECAUSE I DON'T WANT TO FILTER THE GRAPHS BEFORE RENDERING THAT IS WHY I KEPT ORIGINAL DATA
+  const [graphs, setGraphs] = useState<Graph[]>([]);
   const [searchFileText, setSearchFileText] = useState<string>('');
   const [newGraphName, setNewGraphName] = useState<string>('');
 
@@ -112,41 +112,56 @@ const GraphsList: React.FC = () => {
   return (
     <div>
       <PageHeader
-        heading="Graphs List"
+        heading="Graph List"
         RightContent={() => (
-          <Button type="primary" onClick={() => setIsAddGraphModalOpen(true)}>
+          <Button
+            type="primary"
+            onClick={() => setIsAddGraphModalOpen(true)}
+            id="add-graph-button"
+          >
             Add Graph
           </Button>
         )}
       />
       <SearchField
         id="search-graphs"
+        searchButtonId="search-graphs-button"
         value={searchFileText}
         onChange={(v: string) => setSearchFileText(v)}
         onSearch={searchGraphs}
         placeholder="Search Graph"
         onCancelSearch={onCancelSearch}
       />
-      <Table<Graphs> dataSource={graphs} pagination={false}>
+      <Table<Graph> dataSource={graphs} pagination={false} id="graphs-table">
         <Column title="Graph Id" dataIndex="id" key="id" />
         <Column title="Graph Name" dataIndex="name" key="name" />
         <Column
           title="Actions"
           dataIndex=""
           key="x"
-          render={(row) => (
+          render={(row, _, i) => (
             <>
-              <DeleteOutlined
-                onClick={() => deleteGraph(row.id)}
-                className="delete-icon"
-              />
+              <Popconfirm
+                title="Delete Graph"
+                description="Are you sure to delete this Graph?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={() => deleteGraph(row.id)}
+                cancelButtonProps={{ id: 'delete-graph-cancel' }}
+                okButtonProps={{ id: 'delete-graph-ok-confirm' }}
+              >
+                <DeleteOutlined
+                  id={`delete-graph-${i}`}
+                  className="delete-icon"
+                />
+              </Popconfirm>
 
               <Link
                 href={`/graph/${row.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <MergeFilled className="graph-icon" />
+                <ExportOutlined className="graph-icon" />
               </Link>
             </>
           )}
@@ -160,8 +175,10 @@ const GraphsList: React.FC = () => {
           setIsAddGraphModalOpen(false);
           setNewGraphName('');
         }}
+        okButtonProps={{ id: 'add-graph-form-submit-button' }}
       >
         <Input
+          id="add-graph-input"
           placeholder="Graph Name"
           value={newGraphName}
           onChange={(e) => setNewGraphName(e.target.value)}

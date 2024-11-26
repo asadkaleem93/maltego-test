@@ -1,9 +1,11 @@
 import { Button, Input } from 'antd';
 
 import './style.css';
+import { CloseCircleOutlined } from '@ant-design/icons';
 
 export const SearchField = ({
   id,
+  searchButtonId,
   value,
   onChange,
   onSearch,
@@ -11,6 +13,7 @@ export const SearchField = ({
   onCancelSearch,
 }: {
   id: string;
+  searchButtonId: string;
   value: string;
   onChange: (value: string) => void;
   onSearch: any;
@@ -25,12 +28,13 @@ export const SearchField = ({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          allowClear={{
+            clearIcon: <CloseCircleOutlined id="cancel-graphs-search-button" />,
+          }}
+          onClear={onCancelSearch}
         />
-        <Button type="primary" onClick={onSearch}>
+        <Button type="primary" onClick={onSearch} id={searchButtonId}>
           Search
-        </Button>
-        <Button type="primary" onClick={onCancelSearch}>
-          Cancel
         </Button>
       </div>
     </div>

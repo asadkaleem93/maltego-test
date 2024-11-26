@@ -10,6 +10,8 @@ interface InputProps {
   id?: string;
 }
 
+// CREATED A RE-USEABLE COMPONENT BUT THEN LATER ADDED ANTD LIBRARY
+
 export const InputField: React.FC<InputProps> = ({
   value,
   onChange,

@@ -2,6 +2,7 @@
   --background: #ffffff;
   --foreground: #171717;
   --primary: #ffc759;
+  --secondary: #303849;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -50,23 +51,23 @@ a {
   padding: 40px;
 }
 
-.ant-btn {
+.ant-btn-primary {
   background-color: var(--primary);
-  color: #000;
+  color: var(--secondary);
   font-weight: 600;
   font-family: n27;
 }
 
 .ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):active {
   background-color: #ffc759;
-  color: #000;
+  color: var(--secondary);
   font-weight: 600;
   font-family: n27;
 }
 
 .ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
   background-color: #ffc759;
-  color: #000;
+  color: var(--secondary);
   font-weight: 600;
   font-family: n27;
 }
@@ -97,4 +98,32 @@ a {
   justify-content: center;
   align-items: center;
   font-size: 35px;
+}
+
+.ant-btn-default {
+  color: var(--secondary);
+  border-color: var(--secondary);
+}
+
+.ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):active,
+.ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover {
+  color: var(--secondary);
+  border-color: var(--secondary);
+}
+
+.ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  ):not(.ant-pagination-size-changer):hover
+  .ant-select-selector,
+.ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  ):not(.ant-pagination-size-changer):focus
+  .ant-select-selector,
+.ant-select-focused:where(
+    .css-dev-only-do-not-override-1x0dypw
+  ).ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customise-input
+  ):not(.ant-pagination-size-changer)
+  .ant-select-selector {
+  border-color: var(--primary);
 }

@@ -1,13 +1,12 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import GraphsList from '../../../containers/graphList/graphList';
 import { PageHeader } from '../pageHeader';
 
 describe('Component', () => {
   it('Renders a heading', () => {
     render(
       <PageHeader
-        heading={'Graphs List'}
+        heading={'Graph List'}
         RightContent={() => <div>Right side content</div>}
       />,
     );
@@ -16,7 +15,7 @@ describe('Component', () => {
     const div = screen.getAllByText('Right side content');
 
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveTextContent('Graphs List');
+    expect(heading).toHaveTextContent('Graph List');
     expect(div[0]).toHaveTextContent('Right side content');
   });
 });

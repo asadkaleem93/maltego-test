@@ -5,7 +5,7 @@
 }
 
 .graph-icon {
-  color: blue;
+  color: var(--secondary);
   font-size: 18px;
   margin-right: 10px;
 }

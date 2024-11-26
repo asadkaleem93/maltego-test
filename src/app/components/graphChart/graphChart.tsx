@@ -1,27 +1,18 @@
 'use client';
 import * as d3 from 'd3';
-import { Edges, Nodes } from '../../interface';
+import { Edges, Node } from '../../interface';
 import { NodeWithIndex } from '../../graph/[id]/page';
 import { regularNodeSize } from '@/constants';
 
-// interface D3NodeProperties extends Nodes {
-//   index: number;
-//   x: number;
-//   y: number;
-//   vx: number;
-//   vy: number;
-// }
-
-// interface D3Nodes {
-//   index: number;
-//   source: D3NodeProperties;
-//   target: D3NodeProperties;
-// }
-
-// interface NodesWithSimulation extends d3.SimulationNodeDatum, Nodes {}
+interface NodeData extends Node {
+  // EVEN THOUGH WE DON'T HAVE THESE VALUES IN ACTUAL DATA BUT D3 IS SENDING THIS
+  // THAT IS WHY WE NEED TO ADD DEFAULT VALUE TO 20, EVEN THOUGH IT IS NOT REQUIRED IN REALITY
+  x?: number;
+  y?: number;
+}
 
 export const GraphChart = (
-  data: { nodes: Nodes[]; edges: Edges[] },
+  data: { nodes: Node[]; edges: Edges[] },
   onNodeClick: (clickedNode: NodeWithIndex) => void,
 ) => {
   const oldSvg = d3.select('#force-chart');
@@ -34,12 +25,10 @@ export const GraphChart = (
 
   const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-  // The force simulation mutates edges and nodes, so create a copy
-  // so that re-evaluating this cell produces the same result.
   const edges = data.edges.map((d) => ({ ...d }));
-  const nodes = data.nodes.map((d) => ({ ...d }));
+  const nodes = data.nodes.map((d) => ({ ...d })) as NodeData[];
+
   const simulation = d3
-    //@ts-expect-error
     .forceSimulation(nodes)
     .force(
       'link',
@@ -97,14 +86,14 @@ export const GraphChart = (
   label
     .attr('font-size', '14px')
     .attr('fill', '#000')
-    .text((d: any) => d.label)
+    .text((d) => d.label)
     .attr('id', (d) => `label-${d.id}`);
 
   function ticked() {
     node
-      .attr('cx', (d: any) => d.x)
-      .attr('cy', (d: any) => d.y)
-      .on('click', (d: any, data: any) => {
+      .attr('cx', (d) => d.x || 20)
+      .attr('cy', (d) => d.y || 20)
+      .on('click', (d, data: any) => {
         onNodeClick({
           group: data.group,
           label: data.label,
@@ -119,21 +108,21 @@ export const GraphChart = (
       .attr('x2', (d: any) => d.target.x)
       .attr('y2', (d: any) => d.target.y);
 
-    label.attr('x', (d: any) => d.x - 20).attr('y', (d: any) => d.y - 20);
+    label.attr('x', (d) => (d.x || 20) - 20).attr('y', (d) => (d.y || 20) - 20);
   }
 
-  function dragstarted(event: any) {
+  function dragstarted(event) {
     if (!event.active) simulation.alphaTarget(0.1).restart();
     event.subject.fx = event.subject.x;
     event.subject.fy = event.subject.y;
   }
 
-  function dragged(event: any) {
+  function dragged(event) {
     event.subject.fx = event.x;
     event.subject.fy = event.y;
   }
 
-  function dragended(event: any) {
+  function dragended(event) {
     if (!event.active) simulation.alphaTarget(0);
     event.subject.fx = null;
     event.subject.fy = null;

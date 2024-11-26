@@ -1,4 +1,4 @@
-export type Nodes = {
+export type Node = {
   id: string;
   label: string;
   group: number;
@@ -9,11 +9,11 @@ export type Edges = {
   target: string;
 };
 
-export type Graphs = {
+export type Graph = {
   id: string;
   name: string;
   data: {
-    nodes: Nodes[];
+    nodes: Node[];
     edges: Edges[];
   };
 };
