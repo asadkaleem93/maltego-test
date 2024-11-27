@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Popconfirm, Table } from 'antd';
+import { Button, Input, Popconfirm, Table, Tooltip } from 'antd';
 
 import { Graph } from '@/app/interface';
 import './style.css';
@@ -150,10 +150,12 @@ const GraphsList: React.FC = () => {
                 cancelButtonProps={{ id: 'delete-graph-cancel' }}
                 okButtonProps={{ id: 'delete-graph-ok-confirm' }}
               >
-                <DeleteOutlined
-                  id={`delete-graph-${i}`}
-                  className="delete-icon"
-                />
+                <Tooltip placement="top" title={'Delete Graph'}>
+                  <DeleteOutlined
+                    id={`delete-graph-${i}`}
+                    className="delete-icon"
+                  />
+                </Tooltip>
               </Popconfirm>
 
               <Link
@@ -161,7 +163,9 @@ const GraphsList: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <ExportOutlined className="graph-icon" />
+                <Tooltip placement="top" title={'Open Graph'}>
+                  <ExportOutlined className="graph-icon" />
+                </Tooltip>
               </Link>
             </>
           )}
